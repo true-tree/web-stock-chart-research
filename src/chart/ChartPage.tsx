@@ -1,4 +1,11 @@
-import React, { FC, useRef, useEffect, useState } from "react";
+import React, {
+  FC,
+  useRef,
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 import { init, dispose, KLineData, Chart } from "klinecharts";
 import generatedKLineDataList from "../utils/generatedKLineDataList";
 import Layout from "../Layout";
@@ -45,9 +52,27 @@ const getTooltipOptions = () => {
 
 const ChartPage: FC = () => {
   const chartDom = useRef<HTMLDivElement>(null);
+  const interval = useRef<NodeJS.Timer>();
   const [chartInstance, setChartInstance] = useState<Chart>();
-  console.log(chartInstance);
+  const [currentPoint, setCurrentPoint] = useState<number>(150);
+  const chartData: KLineData[] = useMemo(() => generatedKLineDataList(), []);
 
+  useEffect(() => {
+    interval.current = setInterval(() => {
+      if (chartData.length > currentPoint) {
+        setCurrentPoint((currentPoint) => currentPoint + 1);
+      } else {
+        clearInterval(interval.current);
+      }
+    }, 200);
+  }, []);
+
+  useEffect(() => {
+    console.log(chartData[currentPoint + 1]);
+    chartInstance?.updateData(chartData[currentPoint + 1]);
+  }, [currentPoint]);
+
+  console.log(currentPoint);
   useEffect(() => {
     const chart = init(chartDom.current!);
     setChartInstance(chart!);
@@ -56,9 +81,10 @@ const ChartPage: FC = () => {
     chartInstance.createTechnicalIndicator("MA", false, {
       id: "candle_pane",
     });
+
     chartInstance.createTechnicalIndicator("KDJ", false, { height: 80 });
     chartInstance.setStyleOptions(getTooltipOptions());
-    chartInstance.applyNewData(generatedKLineDataList());
+    chartInstance.applyNewData(chartData.slice(0, currentPoint));
 
     return () => {
       dispose(chartDom.current!);
