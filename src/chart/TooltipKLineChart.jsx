@@ -3,6 +3,17 @@ import { init, dispose } from "klinecharts";
 import generatedKLineDataList from "../utils/generatedKLineDataList";
 import Layout from "../Layout";
 
+// applyNewData(dataList, false), updateData(singleBarData) 써보기
+
+// const kLineModel = {
+//   open: prices[openIdx],
+//   low: prices[0],
+//   high: prices[3],
+//   close: prices[closeIdx],
+//   volume: volume,
+//   timestamp
+// }
+
 function getTooltipOptions(
   candleShowType,
   candleShowRule,
@@ -11,8 +22,8 @@ function getTooltipOptions(
   return {
     candle: {
       tooltip: {
-        showType: candleShowType,
-        showRule: candleShowRule,
+        showType: "standard",
+        showRule: "always",
         labels: ["open：", "close：", "diff"],
         values: (kLineData) => {
           const change =
